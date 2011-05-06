@@ -22,7 +22,6 @@ import static org.hamcrest.core.Is.is;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.Vector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -134,19 +133,6 @@ public class GithubServiceUT {
         assertThat(i.getSummary(), is("TestIssue03"));
         assertThat(i.getId(), is("3"));
         assertThat(i.getStatus(), is(Status.NEW));
-    }
-    
-    @Test
-    public void testAddAndRemoveLabelToIssue() throws Exception {
-        Vector<String> labelsBefore = githubClient.getGithubIssue("3").getLabels();
-        githubClient.addLabelToIssue("plsLabel", 3);
-        Vector<String> labels = githubClient.getGithubIssue("3").getLabels();
-        assertThat(labels.size(), is(labelsBefore.size() + 1));
-        assertThat(labels.lastElement(), is("plsLabel"));
-        
-        githubClient.removeLabelFromIssue("plsLabel", 3);
-        Vector<String> labelsAfter = githubClient.getGithubIssue("3").getLabels();
-        assertThat(labelsAfter.size(), is(labelsBefore.size()));
     }
     
     @Test

@@ -45,9 +45,9 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     private String githubPassword;
     private String repository;
     private String repositoryOwner;
-
-    private GitHubAPI ghapi = new GitHubAPI();
     
+    private GitHubAPI ghapi = new GitHubAPI();
+
     public GithubService(String id) {
         super(id);
     }
@@ -233,43 +233,59 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
         for (Map.Entry<IssueAttribute, String> entry : changes.entrySet()) {
             if (entry.getKey().equals(Issue.Field.STATUS)) {
-                if (entry.getValue().toLowerCase().equals("open")) {
-                    throw new DomainMethodNotImplementedException("reopen in ghapi does not work properly");
-                    //service.reopen(repositoryOwner, repository, Integer.valueOf(id));
-                } else if (entry.getValue().toLowerCase().equals("closed")) {
-                    service.close(repositoryOwner, repository, Integer.valueOf(id));
-                }
+                editStatus(id, service, entry);
             } else if (entry.getKey().equals(Issue.Field.DESCRIPTION)) {
-                Issue tmp = getIssue(id);
-                service.edit(repositoryOwner, repository, Integer.valueOf(id),
-                        tmp.getSummary(), entry.getValue().toString());
+                editDescription(id, service, entry);
             } else if (entry.getKey().equals(Issue.Field.SUMMARY)) {
-                Issue tmp = getIssue(id);
-                service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(),
-                        tmp.getDescription());
+                editSummary(id, service, entry);
             } else if (entry.getKey().equals(Issue.Field.COMPONENT)) {
-                Issue tmp = getIssue(id);
-                
-                for (String i : tmp.getComponents()) {
-                    try {
-                        removeLabelFromIssue(i, Integer.valueOf(id));
-                    } catch (NumberFormatException e) {
-                        log.error(e);
-                    } catch (Exception e) {
-                        log.error(e);
-                    }
-                }
-                
-                for (String i : entry.getValue().split(",")) {
-                    try {
-                        addLabelToIssue(i, Integer.valueOf(id));
-                    } catch (NumberFormatException e) {
-                        log.error(e);
-                    } catch (Exception e) {
-                        log.error(e);
-                    }
-                }
+                editComponents(id, entry);
             }
+        }
+    }
+
+    private void editComponents(String id, Map.Entry<IssueAttribute, String> entry) {
+        Issue tmp = getIssue(id);
+        
+        for (String i : tmp.getComponents()) {
+            try {
+                removeLabelFromIssue(i, Integer.valueOf(id));
+            } catch (NumberFormatException e) {
+                log.error(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        for (String i : entry.getValue().split(",")) {
+            try {
+                addLabelToIssue(i, Integer.valueOf(id));
+            } catch (NumberFormatException e) {
+                log.error(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void editSummary(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
+        Issue tmp = getIssue(id);
+        service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(),
+                tmp.getDescription());
+    }
+
+    private void editDescription(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
+        Issue tmp = getIssue(id);
+        service.edit(repositoryOwner, repository, Integer.valueOf(id),
+                tmp.getSummary(), entry.getValue().toString());
+    }
+
+    private void editStatus(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
+        if (entry.getValue().toLowerCase().equals("open")) {
+            throw new DomainMethodNotImplementedException("reopen in ghapi does not work properly");
+            //service.reopen(repositoryOwner, repository, Integer.valueOf(id));
+        } else if (entry.getValue().toLowerCase().equals("closed")) {
+            service.close(repositoryOwner, repository, Integer.valueOf(id));
         }
     }
     
@@ -277,7 +293,6 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     public void addComponent(String component) {
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
-        
         service.add_label(repositoryOwner, repository, component);
     }
 
@@ -288,18 +303,18 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         service.remove_label(repositoryOwner, repository, component);
     }
     
-    public List<String> getLabels() {
+    List<String> getLabels() {
         Issues service = new Issues(ghapi);
         return processLabels(service.labels(repositoryOwner, repository).resp);
     }
     
-    public GithubIssue getGithubIssue(String id) {
+    GithubIssue getGithubIssue(String id) {
         Issues service = new Issues(ghapi);
         String tmp = service.issue(repositoryOwner, repository, Integer.valueOf(id)).resp;
         return processSingleIssueResponse(tmp);
     }
     
-    public Issue getIssue(String id) {
+    Issue getIssue(String id) {
         return convertGithubIssue(getGithubIssue(id));
     }
 
@@ -318,7 +333,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         return i;
     }
 
-    public void addLabelToIssue(String text, int issueId) throws Exception {
+    private void addLabelToIssue(String text, int issueId) throws Exception {
        
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
@@ -329,7 +344,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         }
     }
 
-    public void removeLabelFromIssue(String text, int issueId) throws Exception {
+    private void removeLabelFromIssue(String text, int issueId) throws Exception {
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         String tmp = service.remove_label_from_Issue(repositoryOwner, repository, text, issueId).resp;
