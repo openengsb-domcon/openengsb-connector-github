@@ -49,15 +49,19 @@ public class GithubServiceUT {
         githubClient.setGithubPassword("wrongPWD");
         Issue issue = createIssue("id1");
         int oldNumber = githubClient.getIssues().size();
+        
         githubClient.createIssue(issue);
+        
         assertThat(githubClient.getIssues().size(), is(oldNumber));
     }
 
     @Test
-    public void testCreateIssue() throws Exception {
+    public void testCreateIssue_shouldCreateIssue() throws Exception {
         Issue issue = createIssue("id1");
         int oldNumber = githubClient.getIssues().size();
+        
         githubClient.createIssue(issue);
+        
         assertThat(githubClient.getIssues().size(), is(oldNumber + 1));
     }
 
@@ -65,20 +69,24 @@ public class GithubServiceUT {
     public void testAddCommentWithIncorrectLogin_shouldFail() throws Exception {
         githubClient.setGithubPassword("wrongPWD");
         int oldNumber = githubClient.getComments(1).size();
+        
         githubClient.addComment("1", "TestComment");
+        
         assertThat(githubClient.getComments(1).size(), is(oldNumber));
     }
 
     @Test
-    public void testAddComment() throws Exception {
+    public void testAddComment_shouldAddComment() throws Exception {
         int oldNumber = githubClient.getComments(1).size();
+        
         githubClient.addComment("1", "TestComment");
+        
         assertThat(githubClient.getComments(1).size(), is(oldNumber + 1));
         
     }
 
     @Test
-    public void testUpdateIssue() throws Exception {
+    public void testUpdateIssue_shouldUpdateIsse() throws Exception {
         HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
         changes.put(Issue.Field.STATUS, "closed");
         changes.put(Issue.Field.DESCRIPTION, "updated des");
@@ -101,7 +109,6 @@ public class GithubServiceUT {
         assertThat(k, is(2));
 
         changes.clear();
-        //changes.put(Issue.Field.STATUS, "open");
         changes.put(Issue.Field.DESCRIPTION, "commentbla");
         changes.put(Issue.Field.SUMMARY, "bla");
         changes.put(Issue.Field.COMPONENT, "plsLabel");
@@ -111,7 +118,6 @@ public class GithubServiceUT {
     @Test
     public void testUpdateIssueWithIncorrectLogin_shouldFail() throws Exception {
         githubClient.setGithubPassword("wrongPWD");
-        
         HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
         changes.put(Issue.Field.STATUS, "closed");
         changes.put(Issue.Field.DESCRIPTION, "updated des");
@@ -122,13 +128,12 @@ public class GithubServiceUT {
         Issue tmp = githubClient.getIssue("5");
         assertThat(tmp.getDescription(), is("commentbla"));
         assertThat(tmp.getSummary(), is("bla"));
-        //assertThat(tmp.getStatus(), is(Status.NEW));
     }
    
     @Test
-    public void testGetIssue() throws Exception {
-        githubClient.getIssues();
+    public void testGetIssue_shouldGetIssue() throws Exception {
         Issue i = githubClient.getIssue("3");
+        
         assertThat(i.getDescription(), is("Comment_Of_TestIssue03"));
         assertThat(i.getSummary(), is("TestIssue03"));
         assertThat(i.getId(), is("3"));
@@ -136,9 +141,11 @@ public class GithubServiceUT {
     }
     
     @Test
-    public void testAddAndRemoveComponent() throws Exception {
+    public void testAddAndRemoveComponent_shouldAddAndRemoveComponent() throws Exception {
         int oldSize = githubClient.getLabels().size();
+        
         githubClient.addComponent("TestComponent");
+        
         assertThat(githubClient.getLabels().size(), is(oldSize + 1));
         githubClient.removeComponent("TestComponent");
         assertThat(githubClient.getLabels().size(), is(oldSize));

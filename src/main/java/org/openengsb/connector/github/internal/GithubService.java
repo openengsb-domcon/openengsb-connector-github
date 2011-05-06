@@ -61,7 +61,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     public void addComment(String issueNumber, String commentString) {
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
-        service.add_comment(repositoryOwner, repository, Integer.valueOf(issueNumber), commentString);        
+        service.add_comment(repositoryOwner, repository, Integer.valueOf(issueNumber), commentString);
+        log.info("Commented Issue" + issueNumber + "with \"" + commentString + "\"");
     }
     
     public Vector<GithubComment> getComments(int issueId) {
@@ -97,98 +98,13 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         return listOfCommets;
     }
 
-    public Vector<GithubIssue> getIssues() {
+    Vector<GithubIssue> getIssues() {
         Issues service = new Issues(ghapi);
         String temp = service.list(repositoryOwner, repository, "open").resp;
-        Vector<GithubIssue> listOfIssues = processIssueResponse(temp);
-        return listOfIssues;
-    }
-
-    private Vector<GithubIssue> processIssueResponse(String temp) {
-        Vector<GithubIssue> listOfIssues = new Vector<GithubIssue>();
-        String[] v = temp.split(",\\{\"gravatar_id\":\"");
-        v[0] = v[0].substring(29);
-        for (String i : v) {
-            listOfIssues.add(processSingleIssueResponse("{\"gravatar_id\":\"" + i));
-        }
+        Vector<GithubIssue> listOfIssues = GithubHelper.processIssueResponse(temp);
         return listOfIssues;
     }
     
-    private GithubIssue processSingleIssueResponse(String temp) {
-        String tmp = temp.substring(temp.indexOf("{\"gravatar_id\":\"") + "{\"gravatar_id\":\"".length(),
-                temp.lastIndexOf("\"}"));
-
-        GithubIssue c = new GithubIssue();
-        int index = tmp.indexOf("\",\"");
-        c.setGravatarId(tmp.substring(0, index));
-        tmp = tmp.substring(index + "\",\"position\":".length());
-        index = tmp.indexOf(",\"");
-        c.setPosition(Double.valueOf(tmp.substring(0, index)));
-        tmp = tmp.substring(index + ",\"number\":".length());
-        index = tmp.indexOf(",\"");
-        c.setNumber(Integer.valueOf(tmp.substring(0, index)));
-        tmp = tmp.substring(index + ",\"votes\":".length());
-        index = tmp.indexOf(",\"");
-        c.setVotes(Integer.valueOf(tmp.substring(0, index)));
-        tmp = tmp.substring(index + ",\"created_at\":\"".length());
-        index = tmp.indexOf("\",\"");
-        c.setCreatedAt(tmp.substring(0, index));
-        tmp = tmp.substring(index + "\",\"comments\":".length());
-        index = tmp.indexOf(",\"");
-        c.setComments(Integer.valueOf(tmp.substring(0, index)));
-        tmp = tmp.substring(index + ",\"body\":\"".length());
-        index = tmp.indexOf("\",\"");
-        c.setBody(tmp.substring(0, index));
-        tmp = tmp.substring(index + "\",\"title\":\"".length());
-        index = tmp.indexOf("\",\"");
-        c.setTitle(tmp.substring(0, index));
-        tmp = tmp.substring(index + "\",\"updated_at\":\"".length());
-        index = tmp.indexOf("\",\"");
-        c.setUpdatedAt(tmp.substring(0, index));
-        
-        int tempIndex = temp.indexOf("\",\"closed_at\":\"");
-        if (tempIndex > -1) {
-            tmp = tmp.substring(index + "\",\"closed_at\":\"".length());
-            index = tmp.indexOf("\",\"");
-            c.setClosedAt(tmp.substring(0, index));
-        }
-        
-        tmp = tmp.substring(index + "\",\"html_url\":\"".length());
-        index = tmp.indexOf("\",\"");
-        c.setHtmlUrl(tmp.substring(0, index));
-        tmp = tmp.substring(index + "\",\"user\":\"".length());
-        index = tmp.indexOf("\",\"");
-        c.setUser(tmp.substring(0, index));
-
-        tmp = tmp.substring(index + "\",\"labels\":[".length());
-        index = tmp.indexOf("],\"");
-
-        Vector<String> labels = new Vector<String>();
-        if (!tmp.startsWith("]")) {
-            String[] tempArray = tmp.substring(0, index).replace("\"", "").split(",");
-            for (String k : tempArray) {
-                labels.add(k);
-            }
-        }
-        c.setLabels(labels);
-
-        tmp = tmp.substring(index + "],\"state\":\"".length(), tmp.length());
-        c.setState(tmp);
-
-        return c;
-    }
-    
-    private List<String> processLabels(String labels) {
-        List<String> labelList = new ArrayList<String>();
-        
-        labels = labels.substring(labels.indexOf(":[\"") + ":[\"".length(), labels.length() - 4);
-        String[] tmp = labels.split("\",\"");
-        for (String temp : tmp) {
-            labelList.add(temp);
-        }
-        
-        return labelList;
-    }
 
     @Override
     public void closeRelease(String arg0) {
@@ -204,9 +120,11 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 engsbIssue.getDescription()).resp;
         if (tmp != null) {
             state = AliveState.ONLINE;
-            return String.valueOf(processIssueResponse(tmp).get(0).getNumber());
+            log.info("Created Issue" + String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber()));
+            return String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber());
         } else {
             state = AliveState.OFFLINE;
+            log.error("Creation failed");
             return null;
         }
     }
@@ -242,6 +160,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 editComponents(id, entry);
             }
         }
+        
+        log.info("Updated Issue" + id);
     }
 
     private void editComponents(String id, Map.Entry<IssueAttribute, String> entry) {
@@ -283,7 +203,6 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     private void editStatus(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
         if (entry.getValue().toLowerCase().equals("open")) {
             throw new DomainMethodNotImplementedException("reopen in ghapi does not work properly");
-            //service.reopen(repositoryOwner, repository, Integer.valueOf(id));
         } else if (entry.getValue().toLowerCase().equals("closed")) {
             service.close(repositoryOwner, repository, Integer.valueOf(id));
         }
@@ -294,6 +213,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.add_label(repositoryOwner, repository, component);
+        
+        log.info("Added component \"" + component + "\"");
     }
 
     @Override
@@ -301,17 +222,19 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.remove_label(repositoryOwner, repository, component);
+        
+        log.info("Removed component \"" + component + "\"");
     }
     
     List<String> getLabels() {
         Issues service = new Issues(ghapi);
-        return processLabels(service.labels(repositoryOwner, repository).resp);
+        return GithubHelper.processLabels(service.labels(repositoryOwner, repository).resp);
     }
     
     GithubIssue getGithubIssue(String id) {
         Issues service = new Issues(ghapi);
         String tmp = service.issue(repositoryOwner, repository, Integer.valueOf(id)).resp;
-        return processSingleIssueResponse(tmp);
+        return GithubHelper.processSingleIssueResponse(tmp);
     }
     
     Issue getIssue(String id) {

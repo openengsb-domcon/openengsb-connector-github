@@ -25,13 +25,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
-/**
- *
- */
 public class GithubServiceInstanceFactoryTest {
 
     @Test
-    public void testUpdateServiceInstance() throws Exception {
+    public void testUpdateServiceInstance_shouldUpdateServiceInstance() throws Exception {
         GithubServiceInstanceFactory ghif = new GithubServiceInstanceFactory();
         Map<String, String> attributes = new HashMap<String, String>();
         GithubService service = (GithubService) ghif.createNewInstance("id");
@@ -40,7 +37,7 @@ public class GithubServiceInstanceFactoryTest {
     }
 
     @Test
-    public void testUpdateValidation() throws Exception {
+    public void testUpdateValidation_shouldUpdateValidation() throws Exception {
         GithubServiceInstanceFactory ghif = new GithubServiceInstanceFactory();
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("github.user", "user");
