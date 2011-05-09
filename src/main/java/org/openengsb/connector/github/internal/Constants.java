@@ -17,25 +17,14 @@
 
 package org.openengsb.connector.github.internal;
 
-import java.util.Map;
+public final class Constants {
 
-import org.openengsb.core.api.Domain;
-import org.openengsb.core.common.AbstractConnectorInstanceFactory;
-
-public class GithubServiceInstanceFactory extends AbstractConnectorInstanceFactory<GithubService> {
-
-    @Override
-    public Domain createNewInstance(String id) {
-        return new GithubService(id);
+    public static final String GITHUB_USER = "github.user";
+    public static final String GITHUB_PWD = "github.password";
+    public static final String GITHUB_REPO = "github.repository";
+    public static final String GITHUB_REPO_OWNER = "github.repositoryOwner";
+    
+    private Constants() {
+        
     }
-
-    @Override
-    public void doApplyAttributes(GithubService instance, Map<String, String> attributes) {
-        instance.setGithubUser(attributes.get(Constants.GITHUB_USER));
-        instance.setGithubPassword(attributes.get(Constants.GITHUB_PWD));
-
-        instance.setRepository(attributes.get(Constants.GITHUB_REPO));
-        instance.setRepositoryOwner(attributes.get(Constants.GITHUB_REPO_OWNER));
-    }
-
 }
