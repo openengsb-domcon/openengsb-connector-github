@@ -25,8 +25,8 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.idlesoft.libraries.ghapi.GitHubAPI;
-import org.idlesoft.libraries.ghapi.Issues;
+import org.openengsb.connector.github.ghapi.GitHubAPI;
+import org.openengsb.connector.github.ghapi.Issues;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.DomainMethodNotImplementedException;
 import org.openengsb.core.common.AbstractOpenEngSBService;
@@ -108,7 +108,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public void closeRelease(String arg0) {
-        //Not available in ghapi
+        // Not available in ghapi
+        // TODO: Issue 1542
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
@@ -131,13 +132,15 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public ArrayList<String> generateReleaseReport(String arg0) {
-        //Not available in ghapi
+        // Not available in ghapi
+        // TODO: Issue 1542
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
     @Override
     public void moveIssuesFromReleaseToRelease(String arg0, String arg1) {
-        //Not available in ghapi
+        // Not available in ghapi
+        // TODO: Issue 1541
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
@@ -160,7 +163,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 editComponents(id, entry);
             }
         }
-        
+
         log.info("Updated Issue" + id);
     }
 

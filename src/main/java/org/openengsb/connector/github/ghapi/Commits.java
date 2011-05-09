@@ -7,7 +7,7 @@
  * Licensed under the New BSD License.
  */
 
-package org.idlesoft.libraries.ghapi;
+package org.openengsb.connector.github.ghapi;
 
 public class Commits extends APIAbstract {
 
