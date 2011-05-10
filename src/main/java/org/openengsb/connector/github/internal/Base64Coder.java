@@ -38,7 +38,7 @@
  * Licensed under the New BSD License.
  */
 
-package org.openengsb.connector.github.ghapi;
+package org.openengsb.connector.github.internal;
 
 /**
  * A Base64 encoder/decoder.

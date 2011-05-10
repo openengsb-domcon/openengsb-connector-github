@@ -24,7 +24,7 @@
  * Licensed under the New BSD License.
  */
 
-package org.openengsb.connector.github.ghapi;
+package org.openengsb.connector.github.internal;
 
 public class GitHubAPI {
     public APIAbstract api = new APIAbstract(this);
@@ -32,7 +32,7 @@ public class GitHubAPI {
     public User user;
     public Commits commits;
     public Issues issues;
-    public org.openengsb.connector.github.ghapi.Object object;
+    public org.openengsb.connector.github.internal.Object object;
     public Gists gists;
 
     public GitHubAPI() {
@@ -44,7 +44,7 @@ public class GitHubAPI {
         user = new User(this);
         commits = new Commits(this);
         issues = new Issues(this);
-        object = new org.openengsb.connector.github.ghapi.Object(this);
+        object = new org.openengsb.connector.github.internal.Object(this);
         gists = new Gists(this);
 
         return this;

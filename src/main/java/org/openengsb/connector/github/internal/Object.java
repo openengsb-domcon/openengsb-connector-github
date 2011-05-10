@@ -24,7 +24,7 @@
  * Licensed under the New BSD License.
  */
 
-package org.openengsb.connector.github.ghapi;
+package org.openengsb.connector.github.internal;
 
 public class Object extends APIAbstract {
 

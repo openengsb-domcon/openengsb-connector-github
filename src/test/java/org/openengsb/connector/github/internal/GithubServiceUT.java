@@ -32,16 +32,16 @@ import org.openengsb.domain.issue.models.IssueAttribute;
 public class GithubServiceUT {
 
     private GithubService githubClient;
-    private String repository = "ENTER_YOUR_TESTREPO_HERER_TO_RUN_TEST";
-    private String repositoryOwner = "ENTER_YOUR_TESTOWNER_HERER_TO_RUN_TEST";
+    private String repository = "testRepo";
+    private String repositoryOwner = "e0828244";
 
     @Before
     public void setUp() throws Exception {
         githubClient = new GithubService("id");
         githubClient.setRepository(repository);
         githubClient.setRepositoryOwner(repositoryOwner);
-        githubClient.setGithubPassword("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
-        githubClient.setGithubUser("ENTER_YOUR_ID_HERER_TO_RUN_TEST");
+        githubClient.setGithubPassword("sers123!");
+        githubClient.setGithubUser("e0828244");
     }
 
     @Test

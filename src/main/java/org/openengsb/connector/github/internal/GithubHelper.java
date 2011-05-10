@@ -21,15 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * This class contains methods which convert the response of REST to the corresponding git object
+ */
 public final class GithubHelper {
     
     private GithubHelper() {
         
     }
     
-    public static GithubIssue processSingleIssueResponse(String temp) {
-        String tmp = temp.substring(temp.indexOf("{\"gravatar_id\":\"") + "{\"gravatar_id\":\"".length(),
-                temp.lastIndexOf("\"}"));
+    public static GithubIssue processSingleIssueResponse(String response) {
+        String tmp = response.substring(response.indexOf("{\"gravatar_id\":\"") + "{\"gravatar_id\":\"".length(),
+                response.lastIndexOf("\"}"));
 
         GithubIssue c = new GithubIssue();
         int index = tmp.indexOf("\",\"");
@@ -59,7 +62,7 @@ public final class GithubHelper {
         index = tmp.indexOf("\",\"");
         c.setUpdatedAt(tmp.substring(0, index));
         
-        int tempIndex = temp.indexOf("\",\"closed_at\":\"");
+        int tempIndex = response.indexOf("\",\"closed_at\":\"");
         if (tempIndex > -1) {
             tmp = tmp.substring(index + "\",\"closed_at\":\"".length());
             index = tmp.indexOf("\",\"");
@@ -103,9 +106,9 @@ public final class GithubHelper {
         return labelList;
     }
     
-    public static Vector<GithubIssue> processIssueResponse(String temp) {
+    public static Vector<GithubIssue> processIssueResponse(String response) {
         Vector<GithubIssue> listOfIssues = new Vector<GithubIssue>();
-        String[] v = temp.split(",\\{\"gravatar_id\":\"");
+        String[] v = response.split(",\\{\"gravatar_id\":\"");
         v[0] = v[0].substring(29);
         for (String i : v) {
             listOfIssues.add(GithubHelper.processSingleIssueResponse("{\"gravatar_id\":\"" + i));

@@ -24,6 +24,16 @@ public final class Constants {
     public static final String GITHUB_REPO = "github.repository";
     public static final String GITHUB_REPO_OWNER = "github.repositoryOwner";
     
+    public static final String GITHUB_USER_NAME = "github.user.name";
+    public static final String GITHUB_PWD_NAME = "github.password.name";
+    public static final String GITHUB_REPO_NAME = "github.repository.name";
+    public static final String GITHUB_REPO_OWNER_NAME = "github.repositoryOwner.name";
+    
+    public static final String GITHUB_USER_DESCRIPTION = "github.user.description";
+    public static final String GITHUB_PWD_DESCRIPTION = "github.password.description";
+    public static final String GITHUB_REPO_DESCRIPTION = "github.repository.description";
+    public static final String GITHUB_REPO_OWNER_DESCRIPTION = "github.repositoryOwner.description";
+    
     private Constants() {
         
     }

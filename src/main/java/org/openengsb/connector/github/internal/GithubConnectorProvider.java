@@ -29,14 +29,14 @@ public class GithubConnectorProvider extends AbstractConnectorProvider {
         builder.id(this.id);
         builder.name("service.name").description("service.description");
 
-        builder.attribute(builder.newAttribute().id("github.user").name("github.user.name")
-                .description("github.user.description").build());
-        builder.attribute(builder.newAttribute().id("github.password").name("github.password.name")
-                .description("github.password.description").defaultValue("").asPassword().build());
-        builder.attribute(builder.newAttribute().id("github.repository").name("github.repository.name")
-                .description("github.repository.description").defaultValue("").required().build());
-        builder.attribute(builder.newAttribute().id("github.repositoryOwner").name("github.repositoryOwner.name")
-                .description("github.repositoryOwner.description").defaultValue("").required().build());
+        builder.attribute(builder.newAttribute().id(Constants.GITHUB_USER).name(Constants.GITHUB_USER_NAME)
+                .description(Constants.GITHUB_USER_DESCRIPTION).build());
+        builder.attribute(builder.newAttribute().id(Constants.GITHUB_PWD).name(Constants.GITHUB_PWD_NAME)
+                .description(Constants.GITHUB_PWD_DESCRIPTION).defaultValue("").asPassword().build());
+        builder.attribute(builder.newAttribute().id(Constants.GITHUB_REPO).name(Constants.GITHUB_REPO_NAME)
+                .description(Constants.GITHUB_REPO_DESCRIPTION).defaultValue("").required().build());
+        builder.attribute(builder.newAttribute().id(Constants.GITHUB_REPO_OWNER).name(Constants.GITHUB_REPO_OWNER_NAME)
+                .description(Constants.GITHUB_REPO_OWNER_DESCRIPTION).defaultValue("").required().build());
 
         return builder.build();
     }

@@ -40,10 +40,10 @@ public class GithubServiceInstanceFactoryTest {
     public void testUpdateValidation_shouldUpdateValidation() throws Exception {
         GithubServiceInstanceFactory ghif = new GithubServiceInstanceFactory();
         Map<String, String> attributes = new HashMap<String, String>();
-        attributes.put("github.user", "user");
-        attributes.put("github.password", "pwd");
-        attributes.put("github.repository", "testRepo");
-        attributes.put("github.repositoryOwner", "testOwner");
+        attributes.put(Constants.GITHUB_USER, "user");
+        attributes.put(Constants.GITHUB_PWD, "pwd");
+        attributes.put(Constants.GITHUB_REPO, "testRepo");
+        attributes.put(Constants.GITHUB_REPO_OWNER, "testOwner");
         
         GithubService githubService = new GithubService("id"); 
         ghif.applyAttributes(githubService, attributes); 
