@@ -43,7 +43,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     private String githubPassword;
     private String repository;
     private String repositoryOwner;
-    
+
     private GitHubAPI ghapi = new GitHubAPI();
 
     public GithubService(String id) {
@@ -62,10 +62,10 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         service.add_comment(repositoryOwner, repository, Integer.valueOf(issueNumber), commentString);
         LOGGER.info("Commented Issue" + issueNumber + "with \"" + commentString + "\"");
     }
-    
+
     public Vector<GithubComment> getComments(int issueId) {
         Issues service = new Issues(ghapi);
-        
+
         String[] v = service.list_comments(repositoryOwner, repository, issueId).resp
                 .split("\"\\},\\{\"gravatar_id\":\"");
 
@@ -93,6 +93,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             listOfCommets.add(c);
         }
 
+        LOGGER.info("Got list of comments from " + issueId);
+
         return listOfCommets;
     }
 
@@ -100,9 +102,9 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         Issues service = new Issues(ghapi);
         String temp = service.list(repositoryOwner, repository, "open").resp;
         Vector<GithubIssue> listOfIssues = GithubHelper.processIssueResponse(temp);
+        LOGGER.info("Got list of issues");
         return listOfIssues;
     }
-    
 
     @Override
     public void closeRelease(String arg0) {
@@ -167,7 +169,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     private void editComponents(String id, Map.Entry<IssueAttribute, String> entry) {
         Issue tmp = getIssue(id);
-        
+
+        LOGGER.info("Removing old components from issue " + id);
         for (String i : tmp.getComponents()) {
             try {
                 removeLabelFromIssue(i, Integer.valueOf(id));
@@ -177,7 +180,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 throw new RuntimeException(e);
             }
         }
-        
+
+        LOGGER.info("Adding new components to issue " + id);
         for (String i : entry.getValue().split(",")) {
             try {
                 addLabelToIssue(i, Integer.valueOf(id));
@@ -191,14 +195,14 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     private void editSummary(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
         Issue tmp = getIssue(id);
-        service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(),
-                tmp.getDescription());
+        service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(), tmp.getDescription());
+        LOGGER.info("Edited summary of issue " + id + " to \"" + entry.getValue() + "\"");
     }
 
     private void editDescription(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
         Issue tmp = getIssue(id);
-        service.edit(repositoryOwner, repository, Integer.valueOf(id),
-                tmp.getSummary(), entry.getValue().toString());
+        service.edit(repositoryOwner, repository, Integer.valueOf(id), tmp.getSummary(), entry.getValue().toString());
+        LOGGER.info("Edited description of issue " + id + " to \"" + entry.getValue() + "\"");
     }
 
     private void editStatus(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
@@ -206,15 +210,16 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             throw new DomainMethodNotImplementedException("reopen in ghapi does not work properly");
         } else if (entry.getValue().toLowerCase().equals("closed")) {
             service.close(repositoryOwner, repository, Integer.valueOf(id));
+            LOGGER.info("closed issue " + id);
         }
     }
-    
+
     @Override
     public void addComponent(String component) {
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.add_label(repositoryOwner, repository, component);
-        
+
         LOGGER.info("Added component \"" + component + "\"");
     }
 
@@ -223,26 +228,29 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.remove_label(repositoryOwner, repository, component);
-        
+
         LOGGER.info("Removed component \"" + component + "\"");
     }
-    
+
     List<String> getLabels() {
         Issues service = new Issues(ghapi);
+        LOGGER.info("Getting all labels of repo");
         return GithubHelper.processLabels(service.labels(repositoryOwner, repository).resp);
     }
-    
+
     GithubIssue getGithubIssue(String id) {
         Issues service = new Issues(ghapi);
         String tmp = service.issue(repositoryOwner, repository, Integer.valueOf(id)).resp;
+        LOGGER.info("Got issue " + id);
         return GithubHelper.processSingleIssueResponse(tmp);
     }
-    
+
     Issue getIssue(String id) {
         return convertGithubIssue(getGithubIssue(id));
     }
 
     private Issue convertGithubIssue(GithubIssue issue) {
+        LOGGER.info("Converting github issue to openengsb issue");
         Issue i = new Issue();
         i.setDescription(issue.getBody());
         i.setId(String.valueOf(issue.getNumber()));
@@ -258,7 +266,6 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     }
 
     private void addLabelToIssue(String text, int issueId) throws Exception {
-       
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         String tmp = service.add_label_to_Issue(repositoryOwner, repository, text, issueId).resp;
@@ -266,6 +273,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             LOGGER.error("Not Authorized Access!");
             throw new Exception("User not authorized!");
         }
+        LOGGER.info("Added label \"" + text + "\" to issue " + issueId);
     }
 
     private void removeLabelFromIssue(String text, int issueId) throws Exception {
@@ -276,8 +284,9 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             LOGGER.error("Not Authorized Access!");
             throw new Exception("User not authorized!");
         }
+        LOGGER.info("Removed label \"" + text + "\" from issue " + issueId);
     }
-    
+
     public AliveState getState() {
         return state;
     }

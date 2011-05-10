@@ -21,16 +21,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class contains methods which convert the response of REST to the corresponding git object
  */
 public final class GithubHelper {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(GithubService.class);
     
     private GithubHelper() {
         
     }
     
     public static GithubIssue processSingleIssueResponse(String response) {
+        LOGGER.info("processing: " + response);
         String tmp = response.substring(response.indexOf("{\"gravatar_id\":\"") + "{\"gravatar_id\":\"".length(),
                 response.lastIndexOf("\"}"));
 
@@ -91,10 +97,13 @@ public final class GithubHelper {
         tmp = tmp.substring(index + "],\"state\":\"".length(), tmp.length());
         c.setState(tmp);
 
+        LOGGER.info("Processed: " + c.getTitle());
+        
         return c;
     }
     
     public static List<String> processLabels(String labels) {
+        LOGGER.info("processing: " + labels);
         List<String> labelList = new ArrayList<String>();
         
         labels = labels.substring(labels.indexOf(":[\"") + ":[\"".length(), labels.length() - 4);
@@ -107,6 +116,7 @@ public final class GithubHelper {
     }
     
     public static Vector<GithubIssue> processIssueResponse(String response) {
+        LOGGER.info("processing: " + response);
         Vector<GithubIssue> listOfIssues = new Vector<GithubIssue>();
         String[] v = response.split(",\\{\"gravatar_id\":\"");
         v[0] = v[0].substring(29);
