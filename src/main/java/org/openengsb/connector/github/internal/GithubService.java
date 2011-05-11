@@ -60,7 +60,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.add_comment(repositoryOwner, repository, Integer.valueOf(issueNumber), commentString);
-        LOGGER.info("Commented Issue" + issueNumber + "with \"" + commentString + "\"");
+        LOGGER.info("Commented Issue {} with \"{}\"", issueNumber, commentString);
     }
 
     public Vector<GithubComment> getComments(int issueId) {
@@ -91,9 +91,10 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             tmp = tmp.substring(index + ",\"user\":\"".length());
             c.setUser(tmp);
             listOfCommets.add(c);
+            LOGGER.info("processed comment \"{}\" for Issue \"{}\")", c.getBody(), issueId);
         }
 
-        LOGGER.info("Got list of comments from " + issueId);
+        LOGGER.info("Got list of comments from {}", issueId);
 
         return listOfCommets;
     }
@@ -109,7 +110,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     @Override
     public void closeRelease(String arg0) {
         // Not available in ghapi
-        // TODO: Issue 1542
+        // TODO: OPENENGSB-1542
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
@@ -121,11 +122,11 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 engsbIssue.getDescription()).resp;
         if (tmp != null) {
             state = AliveState.ONLINE;
-            LOGGER.info("Created Issue" + String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber()));
+            LOGGER.info("Created Issue {}", String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber()));
             return String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber());
         } else {
             state = AliveState.OFFLINE;
-            LOGGER.error("Creation failed");
+            LOGGER.error("Creation of Issue \"{}\" failed", engsbIssue.getSummary());
             return null;
         }
     }
@@ -133,14 +134,14 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     @Override
     public ArrayList<String> generateReleaseReport(String arg0) {
         // Not available in ghapi
-        // TODO: Issue 1542
+        // TODO: OPENENGSB-1542
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
     @Override
     public void moveIssuesFromReleaseToRelease(String arg0, String arg1) {
         // Not available in ghapi
-        // TODO: Issue 1541
+        // TODO: OPENENGSB-1541
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
@@ -164,29 +165,33 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             }
         }
 
-        LOGGER.info("Updated Issue" + id);
+        LOGGER.info("Updated Issue \"{}\" with {} changes", id, changes.size());
     }
 
     private void editComponents(String id, Map.Entry<IssueAttribute, String> entry) {
         Issue tmp = getIssue(id);
 
-        LOGGER.info("Removing old components from issue " + id);
+        LOGGER.info("Removing old components from issue {} ", id);
         for (String i : tmp.getComponents()) {
             try {
                 removeLabelFromIssue(i, Integer.valueOf(id));
+                LOGGER.info("Removed component \"{}\" from issue {}", i, id);
             } catch (NumberFormatException e) {
                 LOGGER.error(e.toString());
+                throw new RuntimeException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
 
-        LOGGER.info("Adding new components to issue " + id);
+        LOGGER.info("Adding new components to issue {} ", id);
         for (String i : entry.getValue().split(",")) {
             try {
                 addLabelToIssue(i, Integer.valueOf(id));
+                LOGGER.info("Added component \"{}\" to issue {}", i, id);
             } catch (NumberFormatException e) {
                 LOGGER.error(e.toString());
+                throw new RuntimeException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -196,13 +201,13 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     private void editSummary(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
         Issue tmp = getIssue(id);
         service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(), tmp.getDescription());
-        LOGGER.info("Edited summary of issue " + id + " to \"" + entry.getValue() + "\"");
+        LOGGER.info("Edited summary of issue {} to \"{}\"", id, entry.getValue());
     }
 
     private void editDescription(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
         Issue tmp = getIssue(id);
         service.edit(repositoryOwner, repository, Integer.valueOf(id), tmp.getSummary(), entry.getValue().toString());
-        LOGGER.info("Edited description of issue " + id + " to \"" + entry.getValue() + "\"");
+        LOGGER.info("Edited description of issue {} to \"{}\"", id, entry.getValue());
     }
 
     private void editStatus(String id, Issues service, Map.Entry<IssueAttribute, String> entry) {
@@ -210,7 +215,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             throw new DomainMethodNotImplementedException("reopen in ghapi does not work properly");
         } else if (entry.getValue().toLowerCase().equals("closed")) {
             service.close(repositoryOwner, repository, Integer.valueOf(id));
-            LOGGER.info("closed issue " + id);
+            LOGGER.info("closed issue {} ", id);
         }
     }
 
@@ -219,8 +224,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.add_label(repositoryOwner, repository, component);
-
-        LOGGER.info("Added component \"" + component + "\"");
+        LOGGER.info("Added component \"{}\"", component);
     }
 
     @Override
@@ -228,8 +232,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.remove_label(repositoryOwner, repository, component);
-
-        LOGGER.info("Removed component \"" + component + "\"");
+        LOGGER.info("Removed component \"{}\"", component);
     }
 
     List<String> getLabels() {
@@ -241,7 +244,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     GithubIssue getGithubIssue(String id) {
         Issues service = new Issues(ghapi);
         String tmp = service.issue(repositoryOwner, repository, Integer.valueOf(id)).resp;
-        LOGGER.info("Got issue " + id);
+        LOGGER.info("Got issue {} ", id);
         return GithubHelper.processSingleIssueResponse(tmp);
     }
 
@@ -273,7 +276,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             LOGGER.error("Not Authorized Access!");
             throw new Exception("User not authorized!");
         }
-        LOGGER.info("Added label \"" + text + "\" to issue " + issueId);
+        LOGGER.info("Added label \"{}\" to issue {}", text, issueId);
     }
 
     private void removeLabelFromIssue(String text, int issueId) throws Exception {
@@ -284,7 +287,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             LOGGER.error("Not Authorized Access!");
             throw new Exception("User not authorized!");
         }
-        LOGGER.info("Removed label \"" + text + "\" from issue " + issueId);
+        LOGGER.info("Removed label \"{}\" from issue {}", text, issueId);
     }
 
     public AliveState getState() {

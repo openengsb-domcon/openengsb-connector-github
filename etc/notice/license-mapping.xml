@@ -639,7 +639,7 @@
     </artifact>
     <artifact>
         <groupId>org.antlr</groupId>
-        <artifactId>antlr-runtime</artifactId>    <!-- TODO: check license-->
+        <artifactId>antlr-runtime</artifactId>
         <license>Apache License, Version 2.0</license>
     </artifact>
     <artifact>
