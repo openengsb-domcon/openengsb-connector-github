@@ -1,3 +1,16 @@
+openengsb-connector-github-1.2.1 2011-05-23
+---------------------------------------------------------------------
+
+First maintenance release of the OpenEngSB Github Connector upgrading to the latest OpenEngSB Framework and Issue Domain version.
+
+** Library Upgrade
+    * [OPENENGSB-1585] - Upgrade openengsb-domain-issue to 1.2.2
+    * [OPENENGSB-1609] - Upgrade openengsb-framework to 1.3.0.M2
+
+** Task
+    * [OPENENGSB-1579] - Release openengsb-connector-github-1.2.1
+
+
 openengsb-connector-github-1.2.0 2011-05-16
 ---------------------------------------------------------------------
 
