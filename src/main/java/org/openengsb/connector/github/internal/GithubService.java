@@ -24,19 +24,28 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.openengsb.core.api.AliveState;
+import org.openengsb.core.api.DomainMethodExecutionException;
 import org.openengsb.core.api.DomainMethodNotImplementedException;
-import org.openengsb.core.common.AbstractOpenEngSBService;
+import org.openengsb.core.api.edb.EDBEventType;
+import org.openengsb.core.api.edb.EDBException;
+import org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService;
+import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
 import org.openengsb.domain.issue.IssueDomain;
+import org.openengsb.domain.issue.IssueDomainEvents;
+import org.openengsb.domain.issue.models.Field;
 import org.openengsb.domain.issue.models.Issue;
-import org.openengsb.domain.issue.models.Issue.Status;
 import org.openengsb.domain.issue.models.IssueAttribute;
+import org.openengsb.domain.issue.models.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class GithubService extends AbstractOpenEngSBService implements IssueDomain {
+public class GithubService extends AbstractOpenEngSBConnectorService implements IssueDomain {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubService.class);
+    
+    private IssueDomainEvents issueEvents;
+    private EngineeringKnowledgeBaseService ekbService;
 
     private AliveState state = AliveState.DISCONNECTED;
     private String githubUser;
@@ -122,8 +131,11 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 engsbIssue.getDescription()).resp;
         if (tmp != null) {
             state = AliveState.ONLINE;
-            LOGGER.info("Created Issue {}", String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber()));
-            return String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber());
+            String issueId = String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber());
+            LOGGER.info("Created Issue {}", issueId);
+            engsbIssue.setId(issueId);
+            sendEvent(EDBEventType.UPDATE, engsbIssue);
+            return issueId;
         } else {
             state = AliveState.OFFLINE;
             LOGGER.error("Creation of Issue \"{}\" failed", engsbIssue.getSummary());
@@ -154,16 +166,18 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         }
 
         for (Map.Entry<IssueAttribute, String> entry : changes.entrySet()) {
-            if (entry.getKey().equals(Issue.Field.STATUS)) {
+            if (entry.getKey().equals(Field.STATUS)) {
                 editStatus(id, service, entry);
-            } else if (entry.getKey().equals(Issue.Field.DESCRIPTION)) {
+            } else if (entry.getKey().equals(Field.DESCRIPTION)) {
                 editDescription(id, service, entry);
-            } else if (entry.getKey().equals(Issue.Field.SUMMARY)) {
+            } else if (entry.getKey().equals(Field.SUMMARY)) {
                 editSummary(id, service, entry);
-            } else if (entry.getKey().equals(Issue.Field.COMPONENT)) {
+            } else if (entry.getKey().equals(Field.COMPONENT)) {
                 editComponents(id, entry);
             }
         }
+        
+        sendEvent(EDBEventType.UPDATE, getIssue(id));
 
         LOGGER.info("Updated Issue \"{}\" with {} changes", id, changes.size());
     }
@@ -254,7 +268,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     private Issue convertGithubIssue(GithubIssue issue) {
         LOGGER.info("Converting github issue to openengsb issue");
-        Issue i = new Issue();
+        Issue i = ekbService.createEmptyModelObject(Issue.class);
         i.setDescription(issue.getBody());
         i.setId(String.valueOf(issue.getNumber()));
         i.setOwner(issue.getUser());
@@ -288,6 +302,20 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             throw new Exception("User not authorized!");
         }
         LOGGER.info("Removed label \"{}\" from issue {}", text, issueId);
+    }
+    
+    /**
+     * Sends a CUD event. The type is defined by the enumeration EDBEventType. Also the oid and the role are defined
+     * here.
+     */
+    private void sendEvent(EDBEventType type, Issue issue) {
+        String oid = "github/" + githubUser + "/" + issue.getId();
+        String role = "connector";
+        try {
+            sendEDBEvent(type, issue, issueEvents, oid, role);
+        } catch (EDBException e) {
+            throw new DomainMethodExecutionException(e);
+        }
     }
 
     public AliveState getState() {
@@ -328,5 +356,13 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     public String getRepositoryOwner() {
         return repositoryOwner;
+    }
+    
+    public void setIssueEvents(IssueDomainEvents issueEvents) {
+        this.issueEvents = issueEvents;
+    }
+
+    public void setEkbService(EngineeringKnowledgeBaseService ekbService) {
+        this.ekbService = ekbService;
     }
 }
