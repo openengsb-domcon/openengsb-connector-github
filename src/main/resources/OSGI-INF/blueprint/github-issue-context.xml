@@ -29,7 +29,10 @@
       <entry key="domain" value="issue" />
       <entry key="connector" value="github" />
     </service-properties>
-    <bean class="org.openengsb.connector.github.internal.GithubServiceInstanceFactory" />
+    <bean class="org.openengsb.connector.github.internal.GithubServiceInstanceFactory">
+      <property name="issueEvents" ref="issueEvents" />
+      <property name="ekbService" ref="ekbService" />    
+    </bean>
   </service>
 
   <service>
@@ -37,13 +40,16 @@
       <value>org.openengsb.core.api.ConnectorProvider</value>
     </interfaces>
     <service-properties>
-      <entry key="domain" value="scm" />
-      <entry key="connector" value="git" />
+      <entry key="domain" value="issue" />
+      <entry key="connector" value="github" />
     </service-properties>
     <bean class="org.openengsb.connector.github.internal.GithubConnectorProvider">
       <property name="id" value="github" />
       <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
   </service>
+  
+  <reference id="issueEvents" interface="org.openengsb.domain.issue.IssueDomainEvents" />
+  <reference id="ekbService" interface="org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService" />
 
 </blueprint>
