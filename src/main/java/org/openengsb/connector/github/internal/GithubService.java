@@ -309,9 +309,8 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
      * here.
      */
     private void sendEvent(EDBEventType type, Issue issue) {
-        String oid = "github/" + githubUser + "/" + issue.getId();
         try {
-            sendEDBEvent(type, issue, issueEvents, oid);
+            sendEDBEvent(type, issue, issue.getId(), issueEvents);
         } catch (EDBException e) {
             throw new DomainMethodExecutionException(e);
         }
