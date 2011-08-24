@@ -19,14 +19,22 @@ package org.openengsb.connector.github.internal;
 
 import java.util.Map;
 
-import org.openengsb.core.api.Domain;
+import org.openengsb.core.api.Connector;
+import org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService;
 import org.openengsb.core.common.AbstractConnectorInstanceFactory;
+import org.openengsb.domain.issue.IssueDomainEvents;
 
 public class GithubServiceInstanceFactory extends AbstractConnectorInstanceFactory<GithubService> {
 
+    private IssueDomainEvents issueEvents;
+    private EngineeringKnowledgeBaseService ekbService;
+    
     @Override
-    public Domain createNewInstance(String id) {
-        return new GithubService(id);
+    public Connector createNewInstance(String id) {
+        GithubService service = new GithubService(id);
+        service.setIssueEvents(issueEvents);
+        service.setEkbService(ekbService);
+        return service;
     }
 
     @Override
@@ -36,6 +44,14 @@ public class GithubServiceInstanceFactory extends AbstractConnectorInstanceFacto
 
         instance.setRepository(attributes.get(Constants.GITHUB_REPO));
         instance.setRepositoryOwner(attributes.get(Constants.GITHUB_REPO_OWNER));
+    }
+    
+    public void setIssueEvents(IssueDomainEvents issueEvents) {
+        this.issueEvents = issueEvents;
+    }
+
+    public void setEkbService(EngineeringKnowledgeBaseService ekbService) {
+        this.ekbService = ekbService;
     }
 
 }
