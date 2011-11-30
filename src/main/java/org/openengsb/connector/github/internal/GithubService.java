@@ -28,8 +28,8 @@ import org.openengsb.core.api.DomainMethodExecutionException;
 import org.openengsb.core.api.DomainMethodNotImplementedException;
 import org.openengsb.core.api.edb.EDBEventType;
 import org.openengsb.core.api.edb.EDBException;
-import org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService;
 import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
+import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.issue.IssueDomain;
 import org.openengsb.domain.issue.IssueDomainEvents;
 import org.openengsb.domain.issue.models.Field;
@@ -45,7 +45,6 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubService.class);
     
     private IssueDomainEvents issueEvents;
-    private EngineeringKnowledgeBaseService ekbService;
 
     private AliveState state = AliveState.DISCONNECTED;
     private String githubUser;
@@ -268,7 +267,7 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
 
     private Issue convertGithubIssue(GithubIssue issue) {
         LOGGER.info("Converting github issue to openengsb issue");
-        Issue i = ekbService.createEmptyModelObject(Issue.class);
+        Issue i = ModelUtils.createEmptyModelObject(Issue.class);
         i.setDescription(issue.getBody());
         i.setId(String.valueOf(issue.getNumber()));
         i.setOwner(issue.getUser());
@@ -358,9 +357,5 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
     
     public void setIssueEvents(IssueDomainEvents issueEvents) {
         this.issueEvents = issueEvents;
-    }
-
-    public void setEkbService(EngineeringKnowledgeBaseService ekbService) {
-        this.ekbService = ekbService;
     }
 }

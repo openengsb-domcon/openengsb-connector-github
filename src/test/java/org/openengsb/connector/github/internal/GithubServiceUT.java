@@ -19,7 +19,6 @@ package org.openengsb.connector.github.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import java.rmi.RemoteException;
@@ -27,9 +26,7 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService;
+import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.issue.IssueDomainEvents;
 import org.openengsb.domain.issue.models.Field;
 import org.openengsb.domain.issue.models.Issue;
@@ -51,18 +48,7 @@ public class GithubServiceUT {
         githubClient.setRepositoryOwner(repositoryOwner);
         githubClient.setGithubPassword("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
         githubClient.setGithubUser("ENTER_YOUR_ID_HERER_TO_RUN_TEST");
-        
-        EngineeringKnowledgeBaseService ekbService = mock(EngineeringKnowledgeBaseService.class);
-        doAnswer(new Answer<java.lang.Object>() {
-            public java.lang.Object answer(InvocationOnMock invocation) {
-                return new TestIssue();
-            }
-        })
-            .when(ekbService).createEmptyModelObject(Issue.class);
-        
         IssueDomainEvents domainEvents = mock(IssueDomainEvents.class);
-        
-        githubClient.setEkbService(ekbService);
         githubClient.setIssueEvents(domainEvents);
     }
 
@@ -176,7 +162,7 @@ public class GithubServiceUT {
     
     
     private Issue createIssue(String id) {
-        Issue issue = new TestIssue();
+        Issue issue = ModelUtils.createEmptyModelObject(Issue.class);
         issue.setId(id);
         issue.setSummary("summary");
         issue.setDescription("description");
