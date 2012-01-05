@@ -27,13 +27,13 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.openengsb.core.common.util.ModelUtils;
+import org.openengsb.domain.issue.Field;
+import org.openengsb.domain.issue.Issue;
+import org.openengsb.domain.issue.IssueAttribute;
 import org.openengsb.domain.issue.IssueDomainEvents;
-import org.openengsb.domain.issue.models.Field;
-import org.openengsb.domain.issue.models.Issue;
-import org.openengsb.domain.issue.models.IssueAttribute;
-import org.openengsb.domain.issue.models.Priority;
-import org.openengsb.domain.issue.models.Status;
-import org.openengsb.domain.issue.models.Type;
+import org.openengsb.domain.issue.Priority;
+import org.openengsb.domain.issue.Status;
+import org.openengsb.domain.issue.Type;
 
 public class GithubServiceUT {
 
