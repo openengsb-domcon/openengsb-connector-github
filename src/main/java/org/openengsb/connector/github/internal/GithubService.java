@@ -24,17 +24,15 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.openengsb.core.api.AliveState;
-import org.openengsb.core.api.DomainMethodExecutionException;
 import org.openengsb.core.api.DomainMethodNotImplementedException;
-import org.openengsb.core.api.edb.EDBEventType;
-import org.openengsb.core.api.edb.EDBException;
+import org.openengsb.core.api.ekb.EKBCommit;
+import org.openengsb.core.api.ekb.PersistInterface;
 import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
 import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.issue.Field;
 import org.openengsb.domain.issue.Issue;
 import org.openengsb.domain.issue.IssueAttribute;
 import org.openengsb.domain.issue.IssueDomain;
-import org.openengsb.domain.issue.IssueDomainEvents;
 import org.openengsb.domain.issue.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +42,7 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GithubService.class);
     
-    private IssueDomainEvents issueEvents;
+    private PersistInterface persistInterface;
 
     private AliveState state = AliveState.DISCONNECTED;
     private String githubUser;
@@ -133,7 +131,8 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
             String issueId = String.valueOf(GithubHelper.processIssueResponse(tmp).get(0).getNumber());
             LOGGER.info("Created Issue {}", issueId);
             engsbIssue.setId(issueId);
-            sendEvent(EDBEventType.UPDATE, engsbIssue);
+            EKBCommit commit = createEKBCommit().addInsert(engsbIssue);
+            persistInterface.commit(commit);
             return issueId;
         } else {
             state = AliveState.OFFLINE;
@@ -175,8 +174,8 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
                 editComponents(id, entry);
             }
         }
-        
-        sendEvent(EDBEventType.UPDATE, getIssue(id));
+        EKBCommit commit = createEKBCommit().addUpdate(getIssue(id));
+        persistInterface.commit(commit);
 
         LOGGER.info("Updated Issue \"{}\" with {} changes", id, changes.size());
     }
@@ -303,18 +302,6 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
         LOGGER.info("Removed label \"{}\" from issue {}", text, issueId);
     }
     
-    /**
-     * Sends a CUD event. The type is defined by the enumeration EDBEventType. Also the oid and the role are defined
-     * here.
-     */
-    private void sendEvent(EDBEventType type, Issue issue) {
-        try {
-            sendEDBEvent(type, issue, issueEvents);
-        } catch (EDBException e) {
-            throw new DomainMethodExecutionException(e);
-        }
-    }
-
     public AliveState getState() {
         return state;
     }
@@ -355,7 +342,7 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
         return repositoryOwner;
     }
     
-    public void setIssueEvents(IssueDomainEvents issueEvents) {
-        this.issueEvents = issueEvents;
+    public void setPersistInterface(PersistInterface persistInterface) {
+        this.persistInterface = persistInterface;
     }
 }

@@ -26,11 +26,11 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openengsb.core.api.ekb.PersistInterface;
 import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.issue.Field;
 import org.openengsb.domain.issue.Issue;
 import org.openengsb.domain.issue.IssueAttribute;
-import org.openengsb.domain.issue.IssueDomainEvents;
 import org.openengsb.domain.issue.Priority;
 import org.openengsb.domain.issue.Status;
 import org.openengsb.domain.issue.Type;
@@ -48,8 +48,8 @@ public class GithubServiceUT {
         githubClient.setRepositoryOwner(repositoryOwner);
         githubClient.setGithubPassword("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
         githubClient.setGithubUser("ENTER_YOUR_ID_HERER_TO_RUN_TEST");
-        IssueDomainEvents domainEvents = mock(IssueDomainEvents.class);
-        githubClient.setIssueEvents(domainEvents);
+        PersistInterface persistInterface = mock(PersistInterface.class);
+        githubClient.setPersistInterface(persistInterface);
     }
 
     @Test

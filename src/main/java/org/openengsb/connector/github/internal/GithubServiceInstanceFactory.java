@@ -20,17 +20,17 @@ package org.openengsb.connector.github.internal;
 import java.util.Map;
 
 import org.openengsb.core.api.Connector;
+import org.openengsb.core.api.ekb.PersistInterface;
 import org.openengsb.core.common.AbstractConnectorInstanceFactory;
-import org.openengsb.domain.issue.IssueDomainEvents;
 
 public class GithubServiceInstanceFactory extends AbstractConnectorInstanceFactory<GithubService> {
 
-    private IssueDomainEvents issueEvents;
+    private PersistInterface persistInterface;
     
     @Override
     public Connector createNewInstance(String id) {
         GithubService service = new GithubService(id);
-        service.setIssueEvents(issueEvents);
+        service.setPersistInterface(persistInterface);
         return service;
     }
 
@@ -43,8 +43,8 @@ public class GithubServiceInstanceFactory extends AbstractConnectorInstanceFacto
         instance.setRepositoryOwner(attributes.get(Constants.GITHUB_REPO_OWNER));
     }
     
-    public void setIssueEvents(IssueDomainEvents issueEvents) {
-        this.issueEvents = issueEvents;
+    public void setPersistInterface(PersistInterface persistInterface) {
+        this.persistInterface = persistInterface;
     }
 
 }
