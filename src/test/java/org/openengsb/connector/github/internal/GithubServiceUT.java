@@ -27,7 +27,6 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.openengsb.core.api.ekb.PersistInterface;
-import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.issue.Field;
 import org.openengsb.domain.issue.Issue;
 import org.openengsb.domain.issue.IssueAttribute;
@@ -159,10 +158,8 @@ public class GithubServiceUT {
         assertThat(githubClient.getLabels().size(), is(oldSize));
     }
     
-    
-    
     private Issue createIssue(String id) {
-        Issue issue = ModelUtils.createEmptyModelObject(Issue.class);
+        Issue issue = new Issue();
         issue.setId(id);
         issue.setSummary("summary");
         issue.setDescription("description");
@@ -172,7 +169,6 @@ public class GithubServiceUT {
         issue.setStatus(Status.NEW);
         issue.setDueVersion("versionID1");
         issue.setType(Type.BUG);
-
         return issue;
     }
 }

@@ -28,7 +28,6 @@ import org.openengsb.core.api.DomainMethodNotImplementedException;
 import org.openengsb.core.api.ekb.EKBCommit;
 import org.openengsb.core.api.ekb.PersistInterface;
 import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
-import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.issue.Field;
 import org.openengsb.domain.issue.Issue;
 import org.openengsb.domain.issue.IssueAttribute;
@@ -266,7 +265,7 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
 
     private Issue convertGithubIssue(GithubIssue issue) {
         LOGGER.info("Converting github issue to openengsb issue");
-        Issue i = ModelUtils.createEmptyModelObject(Issue.class);
+        Issue i = new Issue();
         i.setDescription(issue.getBody());
         i.setId(String.valueOf(issue.getNumber()));
         i.setOwner(issue.getUser());
