@@ -140,6 +140,12 @@ public class GithubService extends AbstractOpenEngSBConnectorService implements 
         }
     }
 
+    private EKBCommit createEKBCommit() {
+        EKBCommit commit = new EKBCommit();
+        commit.setDomainId(domainId).setConnectorId(connectorId).setInstanceId(instanceId);
+        return commit;
+    }
+    
     @Override
     public ArrayList<String> generateReleaseReport(String arg0) {
         // Not available in ghapi
